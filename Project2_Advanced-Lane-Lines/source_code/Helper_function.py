@@ -1,3 +1,6 @@
+import numpy as np
+import cv2
+
 # build the filters that might be used
 def sobel_abs_thresh(img, orient='x',sobel_kernel = 5,thresh=(20, 100)):
     # gradient filters take gray or binary image
@@ -144,11 +147,6 @@ def find_lane_pixels(binary_warped):
         win_xright_low = rightx_current - margin
         win_xright_high = rightx_current + margin
         
-        # Draw the windows on the visualization image
-        cv2.rectangle(out_img,(win_xleft_low,win_y_low),
-        (win_xleft_high,win_y_high),(0,255,0), 2) 
-        cv2.rectangle(out_img,(win_xright_low,win_y_low),
-        (win_xright_high,win_y_high),(0,255,0), 2) 
         
         # Identify the nonzero pixels in x and y within the window #
         good_left_inds = ((nonzeroy >= win_y_low) & (nonzeroy < win_y_high) & 
@@ -199,3 +197,105 @@ def polynomial_pts(img_shape, left_fit, right_fit):
     right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
     
     return left_fitx, right_fitx, ploty
+
+def search_around_poly(binary_warped, left_fit, right_fit):
+    # HYPERPARAMETER
+    # Choose the width of the margin around the previous polynomial to search
+    # The quiz grader expects 100 here, but feel free to tune on your own!
+    margin = 100
+
+    # Grab activated pixels
+    nonzero = binary_warped.nonzero()
+    nonzeroy = np.array(nonzero[0])
+    nonzerox = np.array(nonzero[1])
+    
+    ### TO-DO: Set the area of search based on activated x-values ###
+    ### within the +/- margin of our polynomial function ###
+    ### Hint: consider the window areas for the similarly named variables ###
+    ### in the previous quiz, but change the windows to our new search area ###
+    left_lane_inds = ((nonzerox > (left_fit[0]*(nonzeroy**2) + left_fit[1]*nonzeroy + 
+                    left_fit[2] - margin)) & (nonzerox < (left_fit[0]*(nonzeroy**2) + 
+                    left_fit[1]*nonzeroy + left_fit[2] + margin)))
+    right_lane_inds = ((nonzerox > (right_fit[0]*(nonzeroy**2) + right_fit[1]*nonzeroy + 
+                    right_fit[2] - margin)) & (nonzerox < (right_fit[0]*(nonzeroy**2) + 
+                    right_fit[1]*nonzeroy + right_fit[2] + margin)))
+    
+    # Again, extract left and right line pixel positions
+    leftx = nonzerox[left_lane_inds]
+    lefty = nonzeroy[left_lane_inds] 
+    rightx = nonzerox[right_lane_inds]
+    righty = nonzeroy[right_lane_inds]
+    
+    return leftx, lefty, rightx, righty
+
+def measure_curvature_offset(binary_warp, left_fit_cr, right_fit_cr):
+    '''
+    Calculates the curvature of polynomial functions in meters.
+    '''
+    # Define conversions in x and y from pixels space to meters
+    ym_per_pix = 30/720 # meters per pixel in y dimension
+    xm_per_pix = 3.7/580 # meters per pixel in x dimension
+    
+    # We'll choose the maximum y-value, corresponding to the bottom of the image
+    y_eval = binary_warp.shape[0]
+    
+    # Calculation of R_curve (radius of curvature)
+    left_curverad = ((1 + (2*left_fit_cr[0]*y_eval*ym_per_pix + left_fit_cr[1])**2)**1.5) / np.absolute(2*left_fit_cr[0])
+    right_curverad = ((1 + (2*right_fit_cr[0]*y_eval*ym_per_pix + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
+    
+    # offset of the car
+    car_center = binary_warp.shape[1]//2
+    bottom_y = binary_warp.shape[0]
+    bottom_x_left = left_fit_cr[0]*(bottom_y**2) + left_fit_cr[1]*bottom_y + left_fit_cr[2]
+    bottom_x_right = right_fit_cr[0]*(bottom_y**2) + right_fit_cr[1]*bottom_y + right_fit_cr[2]
+    vehicle_offset = car_center - (bottom_x_left + bottom_x_right)//2
+    vehicle_offset *= xm_per_pix
+    
+    return left_curverad, right_curverad, vehicle_offset
+
+def draw_lane(original_img, binary_img, left_fit, right_fit, Minv):
+    new_img = np.copy(original_img)
+    
+    # Create an image to draw the lines on
+    warp_zero = np.zeros_like(binary_img).astype(np.uint8)
+    color_warp = np.dstack((warp_zero, warp_zero, warp_zero))
+    
+    h,w = binary_img.shape
+    ploty = np.linspace(0, h-1, num=h)# to cover same y-range as image
+    left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
+    right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
+
+    # Recast the x and y points into usable format for cv2.fillPoly()
+    pts_left = np.array([np.transpose(np.vstack([left_fitx, ploty]))])
+    pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fitx, ploty])))])
+    pts = np.hstack((pts_left, pts_right))
+
+    # Draw the lane onto the warped blank image
+    cv2.fillPoly(color_warp, np.int_(pts), (0,255, 0))
+    cv2.polylines(color_warp, np.int32([pts_left]), isClosed=False, color=(255,0,255), thickness=15)
+    cv2.polylines(color_warp, np.int32([pts_right]), isClosed=False, color=(0,255,255), thickness=15)
+
+    # Warp the blank back to original image space using inverse perspective matrix (Minv)
+    newwarp = cv2.warpPerspective(color_warp, Minv, (w,h)) 
+    # Combine the result with the original image
+    result = cv2.addWeighted(new_img, 1, newwarp, 0.8, 0)
+    
+    return result
+
+def print_info(Weighted_img, curvature, center_off):
+    new_img = np.copy(Weighted_img)
+    h = new_img.shape[0]
+    font = cv2.FONT_HERSHEY_DUPLEX
+    text = 'Curvature =  ' + '{:04.1f}'.format(curvature) + 'm'
+    cv2.putText(new_img, text, (40,70), font, 1.5, (200,255,155), 2, cv2.LINE_AA)
+    direction = ''
+    if center_off > 0:
+        direction = 'right to'
+    elif center_off < 0:        
+        direction = 'left to'
+    else:
+        direction = 'right on'
+    abs_center_dist = abs(center_off)
+    text = '{:04.2f}'.format(abs_center_dist) + 'm ' + direction + ' center'
+    cv2.putText(new_img, text, (40,120), font, 1.5, (200,255,155), 2, cv2.LINE_AA)
+    return new_img
