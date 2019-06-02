@@ -15,6 +15,7 @@ The project is about developing a pipeline for detecting the lanes on the road u
 ### 2. Methods and tools
   The algorithm is implemented using openCV library in Jupyter notebook.
 ### 3. Algorithm Description
+  The example images for each step of the pipeline are shown in Jupyter notebook, here is a brife summery of the basic principle for advanced lane line detection.
 #### Calibrate the Camera
   This step is used to correct the distortion from front camera of the car. Use about 20 - 25 chess board images for the undistortion, the object points on the chess board are preset coordinates of the corners of chess board, image points are the identified corners by openCV. These object - image point pairs are then used to fit correction transformation coefficients, which is then used to pre-process each frame from the video.
 #### Filter-Out the Lanes from Image
@@ -38,7 +39,8 @@ The project is about developing a pipeline for detecting the lanes on the road u
   The numbers to be calculated include curvature of lanes and offest of the car center based on equations given in the course.
   
 #### Transform the Image Back with Lane Detected and Information Printed
-  Once everything is set, the warped image is transormed back with lane area filled and information printed.
+  Once everything is set, the warped image is transormed back with lane area filled and information printed. It's important to convert the pixel value to real world distance in meters before calculating the curvature and center offset.
   
-### 3. Source of Bugs
-  * performance of the computer vision stage is the dominant determinator of the algorithm, low contrast between lane and road, cracks that make a long dark line on the road all contribute to detection failures
+### 3. Shortcomings of the Algorithm
+  * performance of the computer vision stage is the dominant determinator of the algorithm, low contrast between lane and road, cracks that make a long dark line on the road all contribute to detection failures. There should be a more sophisticated way of using lane color for more robust detection of lanes
+  * lack of fail-safe mechanisims to gurantee reasonable output when one of two lanes fail to be detected
