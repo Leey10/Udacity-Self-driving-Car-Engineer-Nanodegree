@@ -228,7 +228,7 @@ def search_around_poly(binary_warped, left_fit, right_fit):
     
     return leftx, lefty, rightx, righty
 
-def measure_curvature_offset(binary_warp, left_fit_cr, right_fit_cr):
+def measure_curvature_offset(binary_warp, leftx, lefty, rightx, righty ):
     '''
     Calculates the curvature of polynomial functions in meters.
     '''
@@ -237,19 +237,21 @@ def measure_curvature_offset(binary_warp, left_fit_cr, right_fit_cr):
     xm_per_pix = 3.7/580 # meters per pixel in x dimension
     
     # We'll choose the maximum y-value, corresponding to the bottom of the image
-    y_eval = binary_warp.shape[0]
+    y_eval = (binary_warp.shape[0]-1)*ym_per_pix
     
+    # Fit new polynomials to x,y in world space
+    left_fit_cr = np.polyfit(lefty*ym_per_pix, leftx*xm_per_pix, 2)
+    right_fit_cr = np.polyfit(righty*ym_per_pix, rightx*xm_per_pix, 2)
     # Calculation of R_curve (radius of curvature)
-    left_curverad = ((1 + (2*left_fit_cr[0]*y_eval*ym_per_pix + left_fit_cr[1])**2)**1.5) / np.absolute(2*left_fit_cr[0])
-    right_curverad = ((1 + (2*right_fit_cr[0]*y_eval*ym_per_pix + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
+    left_curverad = ((1 + (2*left_fit_cr[0]*y_eval + left_fit_cr[1])**2)**1.5) / np.absolute(2*left_fit_cr[0])
+    right_curverad = ((1 + (2*right_fit_cr[0]*y_eval + right_fit_cr[1])**2)**1.5) / np.absolute(2*right_fit_cr[0])
     
     # offset of the car
-    car_center = binary_warp.shape[1]//2
-    bottom_y = binary_warp.shape[0]
+    car_center = (binary_warp.shape[1]/2)*xm_per_pix
+    bottom_y = (binary_warp.shape[0]-1)*ym_per_pix
     bottom_x_left = left_fit_cr[0]*(bottom_y**2) + left_fit_cr[1]*bottom_y + left_fit_cr[2]
     bottom_x_right = right_fit_cr[0]*(bottom_y**2) + right_fit_cr[1]*bottom_y + right_fit_cr[2]
-    vehicle_offset = car_center - (bottom_x_left + bottom_x_right)//2
-    vehicle_offset *= xm_per_pix
+    vehicle_offset = car_center - (bottom_x_left + bottom_x_right)/2
     
     return left_curverad, right_curverad, vehicle_offset
 
