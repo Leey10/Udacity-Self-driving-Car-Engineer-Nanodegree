@@ -99,5 +99,30 @@ For the first image, the label is 15, and the top 5 softmax outputs are
 
 For the other 5 images, the classifier outputs similar distribution of nearly 100% sure on what it's 'seeing' (which can be seen from the notebook). Therefore, on this traffic sign classification task, neural network achieves better performance than human.
 
+### 4. Additional Learning References
+(Special thanks to Udacity project reviewer for providing the following learning material)
 
+Regarding training data processing:
+* [Comparing different grayscaling techniques](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0029740)
+* [A simplified Mathematical presentation of convolution networks and their different layers and operations](https://arxiv.org/pdf/1603.07285.pdf)
+* [A detailed look into the benefits and pitfalls of data augmentation](https://arxiv.org/pdf/1609.08764.pdf)
+* [A really cool project that implements a traffic sign classifier as a mobile app](https://github.com/OluwoleOyetoke/Accelerated-Android-Vision)
+* [Histogram equalization (CLAHE). This is a technique for adjusting image intensities to enhance contrast.](https://docs.opencv.org/3.1.0/d5/daf/tutorial_py_histogram_equalization.html)
+* [Other options available for data preprocessing](http://cs231n.github.io/neural-networks-2/#datapre)
 
+Regarding neural network training:
+* [Dropout](https://pgaleone.eu/deep-learning/regularization/2017/01/10/anaysis-of-dropout/)
+* [Batch normalization](http://cs231n.github.io/neural-networks-2/#batchnorm)
+* [elu activation](https://arxiv.org/abs/1511.07289)
+* [Leaky ReLUs](https://datascience.stackexchange.com/questions/5706/what-is-the-dying-relu-problem-in-neural-networks?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa)
+* [Tensor Board](https://www.tensorflow.org/guide/graph_viz)
+* [Cyclical learning rate](https://arxiv.org/abs/1506.01186)
+* [Hyperparameters optimization](http://cs231n.github.io/neural-networks-3/#hyper)
+* [Example traffic sign classification](https://medium.freecodecamp.org/recognizing-traffic-lights-with-deep-learning-23dae23287cc)
+* [Example traffic sign classification on mobile](https://proandroiddev.com/mobile-intelligence-traffic-signs-classification-with-retrained-mobilenet-model-71b698d08ba0)
+
+Data Visulization:
+* [tutorial](https://medium.com/@awjuliani/visualizing-neural-network-layer-activation-tensorflow-tutorial-d45f8bf7bbc4)
+
+Additinal references:
+* [Bag of Tricks for Image Classification with Convolutional Neural Networks](https://arxiv.org/pdf/1812.01187.pdf)
