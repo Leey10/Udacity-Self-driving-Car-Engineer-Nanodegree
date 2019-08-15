@@ -34,6 +34,6 @@ for (unsigned int i=0; i < estimations.size(); ++i) {
   
   return rmse;
 ```
-The code is not very efficient, since as estimation list gets longer, the 'residual' calculation and the following become time consuming. A better way is to do this incrementally since every time the function is called, there will only be four new values. Keep a variable to store the summation result and get the new result by adding the increments can be a cheaper way.
+The code is not very efficient, since as estimation list gets longer, the 'residual' calculation and the following become time consuming. A better way is to do this incrementally since every time the function is called, there will only be four new estimations. Keep a variable to store the summation result and get the new result by adding the increments can be a cheaper way.
 
 
