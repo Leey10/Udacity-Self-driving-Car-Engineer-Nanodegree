@@ -1,6 +1,6 @@
 # Kidnapped Vehicle Project 
 
-In this project,a partical filter is developed to localize the vehicle.
+In this project,a particel filter is developed to localize the vehicle.
 
 
 ## Explaination on the files
