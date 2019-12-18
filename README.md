@@ -8,5 +8,6 @@ This repository contains the projects for Udacity self-driving car engineer nano
 * [Project 5 : Extended Kalman Filter](https://github.com/Leey10/Udacity-Self-driving-Car-Engineer-Nanodegree/tree/master/Project5_Extended-Kalman-Filter)
 * [Porject 6 : Kidnapped Vehicle](https://github.com/Leey10/Udacity-Self-driving-Car-Engineer-Nanodegree/tree/master/Project6_Kidnapped%20Vehicle)
 * [Project 7 : HighWay Driving](https://github.com/Leey10/Udacity-Self-driving-Car-Engineer-Nanodegree/tree/master/Project7_HighWay%20Driving)
+* [Project 8: PID Controller](https://github.com/Leey10/Udacity-Self-driving-Car-Engineer-Nanodegree/tree/master/Project%208_PID%20Controller)
 ## Status
 updates on going...
